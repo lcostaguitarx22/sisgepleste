@@ -164,9 +164,28 @@ export const DataProvider = ({ children }) => {
   const calculateTotalVariation = (type, year, item) => {
     const currentYearData = type === 'stats' ? statsData[year] : prodData[year];
     const previousYearData = type === 'stats' ? statsData[year - 1] : prodData[year - 1];
+    
     if (!currentYearData || !previousYearData) return 0;
-    const currentTotal = calculateTotal(currentYearData[item]);
-    const previousTotal = calculateTotal(previousYearData[item]);
+
+    const today = new Date();
+    const currentRealYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    let currentTotal = 0;
+    let previousTotal = 0;
+
+    if (Number(year) === currentRealYear) {
+      // Somar apenas até o mês atual para comparação justa (mesmo período)
+      for (let i = 0; i <= currentMonth; i++) {
+        currentTotal += (currentYearData[item][i] || 0);
+        previousTotal += (previousYearData[item][i] || 0);
+      }
+    } else {
+      // Somar o ano todo para anos anteriores
+      currentTotal = calculateTotal(currentYearData[item]);
+      previousTotal = calculateTotal(previousYearData[item]);
+    }
+
     if (previousTotal === 0) return currentTotal > 0 ? 100 : 0;
     return ((currentTotal - previousTotal) / previousTotal) * 100;
   };
