@@ -4,18 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import { Shield, Lock, User } from 'lucide-react';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [rg, setRg] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (login(username, password)) {
+    const result = await login(rg, password);
+    if (result.success) {
       navigate('/dashboard');
     } else {
-      setError('Credenciais inválidas');
+      setError(result.message);
     }
   };
 
@@ -30,16 +31,16 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Usuário</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>RG</label>
             <div style={{ position: 'relative' }}>
               <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input 
                 type="text" 
                 className="glass-card"
                 style={{ width: '100%', padding: '12px 12px 12px 40px', color: 'white', outline: 'none' }}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin ou user"
+                value={rg}
+                onChange={(e) => setRg(e.target.value)}
+                placeholder="Seu RG"
               />
             </div>
           </div>

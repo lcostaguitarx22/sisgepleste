@@ -71,11 +71,11 @@ const Sidebar = () => {
             fontSize: '0.8rem',
             fontWeight: 'bold'
           }}>
-            {user?.username[0].toUpperCase()}
+            {user?.nome?.[0].toUpperCase()}
           </div>
-          <div>
-            <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{user?.username}</p>
-            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{user?.role === 'admin' ? 'Administrador' : 'Padrão'}</p>
+          <div style={{ overflow: 'hidden' }}>
+            <p style={{ fontSize: '0.9rem', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.nome}</p>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>RG: {user?.rg} • {user?.nivel_acesso}</p>
           </div>
         </div>
         

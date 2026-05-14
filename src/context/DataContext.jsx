@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const DataContext = createContext();
 
@@ -14,10 +15,12 @@ const PROD_ITEMS = [
 ];
 
 const MONTHS = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+const DB_MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 const YEARS = [2021, 2022, 2023, 2024, 2025, 2026];
 
 export const DataProvider = ({ children }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [loading, setLoading] = useState(true);
 
   const initializeYearData = (items) => {
     const data = {};
@@ -30,52 +33,83 @@ export const DataProvider = ({ children }) => {
     return data;
   };
 
-  const [statsData, setStatsData] = useState(() => {
-    const saved = localStorage.getItem('sisgep_stats_v2');
-    const baseData = initializeYearData(STATS_ITEMS);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...baseData, ...parsed };
+  const [statsData, setStatsData] = useState(() => initializeYearData(STATS_ITEMS));
+  const [prodData, setProdData] = useState(() => initializeYearData(PROD_ITEMS));
+
+  // Fetch data from Supabase
+  const fetchData = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('data_entries').select('*');
+    
+    if (error) {
+      console.error('Erro ao buscar dados:', error);
+    } else if (data) {
+      const newStats = initializeYearData(STATS_ITEMS);
+      const newProd = initializeYearData(PROD_ITEMS);
+
+      data.forEach(entry => {
+        const row = DB_MONTHS.map(m => Number(entry[m] || 0));
+        if (entry.type === 'stats') {
+          if (newStats[entry.year]) newStats[entry.year][entry.item] = row;
+        } else {
+          if (newProd[entry.year]) newProd[entry.year][entry.item] = row;
+        }
+      });
+
+      setStatsData(newStats);
+      setProdData(newProd);
     }
-    return baseData;
-  });
-
-  const [prodData, setProdData] = useState(() => {
-    const saved = localStorage.getItem('sisgep_prod_v2');
-    const baseData = initializeYearData(PROD_ITEMS);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...baseData, ...parsed };
-    }
-    return baseData;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('sisgep_stats_v2', JSON.stringify(statsData));
-  }, [statsData]);
-
-  useEffect(() => {
-    localStorage.setItem('sisgep_prod_v2', JSON.stringify(prodData));
-  }, [prodData]);
-
-  const updateStats = (year, item, monthIdx, value) => {
-    setStatsData(prev => ({
-      ...prev,
-      [year]: {
-        ...prev[year],
-        [item]: prev[year][item].map((v, i) => i === monthIdx ? Number(value) : v)
-      }
-    }));
+    setLoading(false);
   };
 
-  const updateProd = (year, item, monthIdx, value) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const updateStats = async (year, item, monthIdx, value) => {
+    const newValues = statsData[year][item].map((v, i) => i === monthIdx ? Number(value) : v);
+    
+    // Optimistic Update
+    setStatsData(prev => ({
+      ...prev,
+      [year]: { ...prev[year], [item]: newValues }
+    }));
+
+    // Persist to Supabase
+    const upsertData = {
+      type: 'stats',
+      year,
+      item,
+      [DB_MONTHS[monthIdx]]: Number(value)
+    };
+
+    const { error } = await supabase
+      .from('data_entries')
+      .upsert(upsertData, { onConflict: 'type,year,item' });
+
+    if (error) console.error('Erro ao salvar no banco:', error);
+  };
+
+  const updateProd = async (year, item, monthIdx, value) => {
+    const newValues = prodData[year][item].map((v, i) => i === monthIdx ? Number(value) : v);
+    
     setProdData(prev => ({
       ...prev,
-      [year]: {
-        ...prev[year],
-        [item]: prev[year][item].map((v, i) => i === monthIdx ? Number(value) : v)
-      }
+      [year]: { ...prev[year], [item]: newValues }
     }));
+
+    const upsertData = {
+      type: 'prod',
+      year,
+      item,
+      [DB_MONTHS[monthIdx]]: Number(value)
+    };
+
+    const { error } = await supabase
+      .from('data_entries')
+      .upsert(upsertData, { onConflict: 'type,year,item' });
+
+    if (error) console.error('Erro ao salvar no banco:', error);
   };
 
   const calculateTotal = (dataArray) => dataArray ? dataArray.reduce((acc, curr) => acc + curr, 0) : 0;
@@ -110,7 +144,7 @@ export const DataProvider = ({ children }) => {
     <DataContext.Provider value={{ 
       statsData, prodData, updateStats, updateProd, 
       STATS_ITEMS, PROD_ITEMS, MONTHS, YEARS,
-      selectedYear, setSelectedYear,
+      selectedYear, setSelectedYear, loading,
       calculateTotal, calculateVariation, calculateTotalVariation
     }}>
       {children}
