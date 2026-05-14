@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
 
 const Stats = () => {
-  const { statsData, updateStats, STATS_ITEMS, MONTHS, YEARS, selectedYear, setSelectedYear, calculateTotal, calculateVariation, calculateTotalVariation } = useData();
+  const { statsData, updateStats, STATS_ITEMS, MONTHS, YEARS, selectedYear, setSelectedYear, calculateTotal, calculateVariation, calculateTotalVariation, isDirty, saveData, loading, lastSaved } = useData();
   const { isAdmin } = useAuth();
 
   const VariationBadge = ({ value }) => {
@@ -22,6 +22,37 @@ const Stats = () => {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {isDirty && (
+            <span style={{ color: 'var(--accent-color)', fontSize: '0.8rem', fontWeight: '600', animation: 'pulse 2s infinite' }}>
+              Alterações não salvas
+            </span>
+          )}
+          {lastSaved && !isDirty && (
+            <span style={{ color: 'var(--success)', fontSize: '0.8rem' }}>
+              Salvo às {lastSaved.toLocaleTimeString()}
+            </span>
+          )}
+          {isAdmin && (
+            <button 
+              onClick={saveData}
+              disabled={loading || !isDirty}
+              style={{
+                padding: '8px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                background: isDirty ? 'linear-gradient(135deg, var(--primary-color), var(--accent-color))' : 'var(--glass-bg)',
+                color: isDirty ? 'white' : 'var(--text-muted)',
+                fontWeight: '600',
+                cursor: isDirty ? 'pointer' : 'default',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.3s'
+              }}
+            >
+              {loading ? 'Salvando...' : 'Salvar Dados'}
+            </button>
+          )}
           <Calendar size={20} color="var(--primary-color)" />
           <div style={{ display: 'flex', gap: '4px', background: 'var(--glass-bg)', padding: '4px', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
             {YEARS.map(year => (
@@ -115,6 +146,11 @@ const Stats = () => {
         input::-webkit-inner-spin-button {
           -webkit-appearance: none;
           margin: 0;
+        }
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
         }
       `}} />
     </div>
