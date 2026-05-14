@@ -5,29 +5,59 @@ import {
   Shield, Target, AlertTriangle, CheckCircle, Calendar, 
   Skull, HandCoins, Car, Bus, Store, Zap, Package, 
   ShieldAlert, UserMinus, CarFront, FlaskConical, Layers, Lock, Ghost, Search,
-  TrendingUp, TrendingDown, Minus
+  TrendingUp, TrendingDown, Minus, Layers as LayersIcon
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal, calculateTotalVariation } = useData();
 
-  const currentYearStats = statsData[selectedYear] || {};
-  const currentYearProd = prodData[selectedYear] || {};
+  const isAllYears = selectedYear === 'all';
 
-  const crimeTrendsData = MONTHS.map((month, idx) => {
-    const data = { name: month };
+  // Data preparation logic
+  let currentYearStats = {};
+  let currentYearProd = {};
+  let chartData = [];
+
+  if (isAllYears) {
+    // Cumulative logic
     STATS_ITEMS.forEach(item => {
-      data[item] = currentYearStats[item] ? currentYearStats[item][idx] : 0;
+      currentYearStats[item] = new Array(12).fill(0); // For compatibility, but we'll use totals
+      YEARS.forEach(y => {
+        statsData[y][item].forEach((val, idx) => currentYearStats[item][idx] += val);
+      });
     });
-    return data;
-  });
+    PROD_ITEMS.forEach(item => {
+      currentYearProd[item] = new Array(12).fill(0);
+      YEARS.forEach(y => {
+        prodData[y][item].forEach((val, idx) => currentYearProd[item][idx] += val);
+      });
+    });
+
+    // Chart data for "All Years" shows totals per year
+    chartData = YEARS.map(year => {
+      const data = { name: year.toString() };
+      STATS_ITEMS.forEach(item => {
+        data[item] = calculateTotal(statsData[year][item]);
+      });
+      return data;
+    });
+  } else {
+    currentYearStats = statsData[selectedYear] || {};
+    currentYearProd = prodData[selectedYear] || {};
+    
+    chartData = MONTHS.map((month, idx) => {
+      const data = { name: month };
+      STATS_ITEMS.forEach(item => {
+        data[item] = currentYearStats[item] ? currentYearStats[item][idx] : 0;
+      });
+      return data;
+    });
+  }
 
   const KPICard = ({ title, value, variation, icon: Icon, color, isInverse = false }) => {
-    // isInverse = true for crimes (where increase is bad/red)
     const isIncrease = variation > 0;
     const isDecrease = variation < 0;
     
-    // Determine color based on whether increase is good or bad
     let varColor = 'var(--text-muted)';
     if (isIncrease) varColor = isInverse ? '#ef4444' : '#10b981';
     if (isDecrease) varColor = isInverse ? '#10b981' : '#ef4444';
@@ -49,7 +79,7 @@ const Dashboard = () => {
           <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
             <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
-            {selectedYear > YEARS[0] && (
+            {!isAllYears && selectedYear > YEARS[0] && (
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -109,12 +139,29 @@ const Dashboard = () => {
       <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
           <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Dashboard Geral</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Visão consolidada do Batalhão Leste ({selectedYear})</p>
+          <p style={{ color: 'var(--text-muted)' }}>
+            {isAllYears ? 'Visão Consolidada de Todos os Anos' : `Visão consolidada do Batalhão Leste (${selectedYear})`}
+          </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Calendar size={20} color="var(--primary-color)" />
+          <LayersIcon size={20} color="var(--primary-color)" />
           <div style={{ display: 'flex', gap: '4px', background: 'var(--glass-bg)', padding: '4px', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
+            <button
+              onClick={() => setSelectedYear('all')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                background: selectedYear === 'all' ? 'var(--primary-color)' : 'transparent',
+                color: selectedYear === 'all' ? 'white' : 'var(--text-muted)',
+                fontWeight: '600',
+                transition: 'all 0.2s'
+              }}
+            >
+              TODOS
+            </button>
             {YEARS.map(year => (
               <button
                 key={year}
@@ -150,7 +197,7 @@ const Dashboard = () => {
             key={item}
             title={item.replace(' (TRÁFICO)', '')} 
             value={calculateTotal(currentYearProd[item])} 
-            variation={calculateTotalVariation('prod', selectedYear, item)}
+            variation={!isAllYears ? calculateTotalVariation('prod', selectedYear, item) : 0}
             icon={prodIcons[item] || CheckCircle} 
             color="#10b981" 
             isInverse={false}
@@ -171,7 +218,7 @@ const Dashboard = () => {
             key={item}
             title={item} 
             value={calculateTotal(currentYearStats[item])} 
-            variation={calculateTotalVariation('stats', selectedYear, item)}
+            variation={!isAllYears ? calculateTotalVariation('stats', selectedYear, item) : 0}
             icon={statsIcons[item] || AlertTriangle} 
             color="#ef4444" 
             isInverse={true}
@@ -181,10 +228,12 @@ const Dashboard = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Tendência de Crimes (Anual - {selectedYear})</h3>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+            {isAllYears ? 'Tendência Histórica de Crimes' : `Tendência de Crimes (${selectedYear})`}
+          </h3>
           <div style={{ height: '300px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={crimeTrendsData}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} />
@@ -201,7 +250,9 @@ const Dashboard = () => {
         </div>
 
         <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Produtividade por Categoria ({selectedYear})</h3>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>
+            {isAllYears ? 'Produtividade Total por Categoria' : `Produtividade por Categoria (${selectedYear})`}
+          </h3>
           <div style={{ height: '300px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={PROD_ITEMS.map(item => ({ name: item.split(' ')[0], value: calculateTotal(currentYearProd[item]) }))}>
