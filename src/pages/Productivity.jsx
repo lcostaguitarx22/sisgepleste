@@ -8,9 +8,9 @@ const Productivity = () => {
   const { isAdmin } = useAuth();
 
   const VariationBadge = ({ value }) => {
-    if (value > 0) return <span style={{ color: 'var(--success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TrendingUp size={14} /> {value.toFixed(1)}%</span>;
-    if (value < 0) return <span style={{ color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TrendingDown size={14} /> {Math.abs(value).toFixed(1)}%</span>;
-    return <span style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Minus size={14} /> 0%</span>;
+    if (value > 0) return <span style={{ color: 'var(--success)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TrendingUp size={14} /> {value.toFixed(2)}%</span>;
+    if (value < 0) return <span style={{ color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TrendingDown size={14} /> {Math.abs(value).toFixed(2)}%</span>;
+    return <span style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Minus size={14} /> 0.00%</span>;
   };
 
   return (
@@ -102,10 +102,11 @@ const Productivity = () => {
                             type="number" 
                             value={val === 0 ? '' : val} 
                             placeholder="0"
+                            step="0.01"
                             onChange={(e) => updateProd(selectedYear, item, idx, e.target.value)}
                             onFocus={(e) => e.target.value === '0' && (e.target.value = '')}
                             style={{ 
-                              width: '50px', 
+                              width: '65px', 
                               background: 'rgba(255,255,255,0.05)', 
                               border: '1px solid var(--surface-border)', 
                               borderRadius: '4px',
@@ -121,7 +122,7 @@ const Productivity = () => {
                         )}
                       </td>
                     ))}
-                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '700', color: 'var(--primary-color)' }}>{total}</td>
+                    <td style={{ padding: '1rem', textAlign: 'center', fontWeight: '700', color: 'var(--primary-color)' }}>{total % 1 === 0 ? total : total.toFixed(2)}</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '4px 1rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>Var. vs {selectedYear - 1}</td>

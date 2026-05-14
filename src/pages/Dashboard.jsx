@@ -32,7 +32,7 @@ const Dashboard = () => {
       </div>
       <div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '4px' }}>{title}</p>
-        <h3 style={{ fontSize: '1.8rem' }}>{value}</h3>
+        <h3 style={{ fontSize: '1.8rem' }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
       </div>
     </div>
   );
