@@ -69,8 +69,10 @@ const Productivity = () => {
                         {isAdmin ? (
                           <input 
                             type="number" 
-                            value={val} 
+                            value={val === 0 ? '' : val} 
+                            placeholder="0"
                             onChange={(e) => updateProd(selectedYear, item, idx, e.target.value)}
+                            onFocus={(e) => e.target.value === '0' && (e.target.value = '')}
                             style={{ 
                               width: '50px', 
                               background: 'rgba(255,255,255,0.05)', 
@@ -78,11 +80,13 @@ const Productivity = () => {
                               borderRadius: '4px',
                               color: 'white',
                               textAlign: 'center',
-                              padding: '4px'
+                              padding: '4px',
+                              opacity: val === 0 ? 0.5 : 1,
+                              transition: 'opacity 0.2s'
                             }}
                           />
                         ) : (
-                          <span style={{ fontSize: '0.9rem' }}>{val}</span>
+                          <span style={{ fontSize: '0.9rem', opacity: val === 0 ? 0.5 : 1 }}>{val}</span>
                         )}
                       </td>
                     ))}
