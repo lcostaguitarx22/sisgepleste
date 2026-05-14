@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const DataContext = createContext();
@@ -38,6 +38,15 @@ export const DataProvider = ({ children }) => {
   const [statsData, setStatsData] = useState(() => initializeYearData(STATS_ITEMS));
   const [prodData, setProdData] = useState(() => initializeYearData(PROD_ITEMS));
 
+  // Refs to always have the latest data in the save function without it being a dependency
+  const statsRef = useRef(statsData);
+  const prodRef = useRef(prodData);
+  const isDirtyRef = useRef(isDirty);
+
+  useEffect(() => { statsRef.current = statsData; }, [statsData]);
+  useEffect(() => { prodRef.current = prodData; }, [prodData]);
+  useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
+
   const fetchData = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('data_entries').select('*');
@@ -65,26 +74,26 @@ export const DataProvider = ({ children }) => {
     fetchData();
   }, []);
 
-  const saveData = useCallback(async () => {
-    if (!isDirty) return;
+  const saveData = async () => {
+    if (!isDirtyRef.current) return;
 
     setLoading(true);
     const entries = [];
+    const currentStats = statsRef.current;
+    const currentProd = prodRef.current;
     
-    // Prepare Stats entries
     YEARS.forEach(year => {
       STATS_ITEMS.forEach(item => {
-        const row = statsData[year][item];
+        const row = currentStats[year][item];
         const entry = { type: 'stats', year, item };
         DB_MONTHS.forEach((m, i) => entry[m] = row[i]);
         entries.push(entry);
       });
     });
 
-    // Prepare Prod entries
     YEARS.forEach(year => {
       PROD_ITEMS.forEach(item => {
-        const row = prodData[year][item];
+        const row = currentProd[year][item];
         const entry = { type: 'prod', year, item };
         DB_MONTHS.forEach((m, i) => entry[m] = row[i]);
         entries.push(entry);
@@ -97,23 +106,24 @@ export const DataProvider = ({ children }) => {
 
     if (error) {
       console.error('Erro ao salvar no banco:', error);
+      alert('Erro ao salvar no banco de dados. Verifique sua conexão.');
     } else {
       setIsDirty(false);
       setLastSaved(new Date());
     }
     setLoading(false);
-  }, [isDirty, statsData, prodData]);
+  };
 
-  // Auto-save every 5 minutes
+  // Auto-save every 5 minutes - only depends on isDirtyRef and saveData
   useEffect(() => {
     const timer = setInterval(() => {
-      if (isDirty) {
+      if (isDirtyRef.current) {
         console.log('Iniciando salvamento automático (5 min)...');
         saveData();
       }
     }, 5 * 60 * 1000);
     return () => clearInterval(timer);
-  }, [isDirty, saveData]);
+  }, []);
 
   const updateStats = (year, item, monthIdx, value) => {
     const val = value === '' ? 0 : Number(value);
