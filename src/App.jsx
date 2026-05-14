@@ -1,0 +1,52 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Stats from './pages/Stats';
+import Productivity from './pages/Productivity';
+import Sidebar from './components/Sidebar';
+import './index.css';
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  return (
+    <div style={{ display: 'flex' }}>
+      <Sidebar />
+      <main style={{ flex: 1, padding: '20px', height: '100vh', overflowY: 'auto' }}>
+        {children}
+      </main>
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <DataProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route 
+              path="/dashboard" 
+              element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
+            />
+            <Route 
+              path="/stats" 
+              element={<ProtectedRoute><Stats /></ProtectedRoute>} 
+            />
+            <Route 
+              path="/productivity" 
+              element={<ProtectedRoute><Productivity /></ProtectedRoute>} 
+            />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </Router>
+      </DataProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;
