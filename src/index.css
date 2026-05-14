@@ -112,3 +112,26 @@ h1, h2, h3 {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+/* App Layout */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 70px; /* Width of collapsed sidebar */
+  height: 100vh;
+  overflow-y: auto;
+  transition: margin-left 0.4s ease;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem;
+    padding-top: 5rem; /* Space for mobile toggle */
+  }
+}
