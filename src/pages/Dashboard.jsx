@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal } = useData();
+  const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal, calculateTotalVariation } = useData();
 
   const isAllYears = selectedYear === 'all';
 
@@ -227,7 +227,7 @@ const Dashboard = () => {
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{isAllYears ? 'Produtividade Total por Categoria' : `Produtividade por Categoria (${selectedYear})`}</h3>
           <div style={{ height: '300px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={PROD_ITEMS.map(item => ({ name: item.split(' ')[0], value: isAllYears ? currentDisplayProd[item] : calculateTotal(statsData[selectedYear][item]) }))}>
+              <BarChart data={PROD_ITEMS.map(item => ({ name: item.split(' ')[0], value: currentDisplayProd[item] }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                 <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} />
