@@ -13,7 +13,6 @@ const Dashboard = () => {
 
   const isAllYears = selectedYear === 'all';
 
-  // Helper to calculate total for a specific year (handles current year period logic)
   const getYearTotal = (type, year, item) => {
     const dataArray = type === 'stats' ? statsData[year][item] : prodData[year][item];
     const today = new Date();
@@ -30,7 +29,6 @@ const Dashboard = () => {
     return calculateTotal(dataArray);
   };
 
-  // Helper for Global Variation (First Year vs Last Year)
   const calculateGlobalVariation = (type, item) => {
     const firstYear = YEARS[0];
     const lastYear = YEARS[YEARS.length - 1];
@@ -42,7 +40,6 @@ const Dashboard = () => {
     return ((lastTotal - firstTotal) / firstTotal) * 100;
   };
 
-  // Data preparation
   let currentDisplayStats = {};
   let currentDisplayProd = {};
   let chartData = [];
@@ -93,38 +90,52 @@ const Dashboard = () => {
 
     return (
       <div className="glass-card" style={{ 
-        padding: '1.2rem', 
+        padding: '1rem', 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '1rem', 
+        gap: '0.8rem', 
         border: '1px solid var(--surface-border)',
-        minWidth: '240px'
+        width: '100%'
       }}>
-        <div style={{ padding: '10px', background: `${color}20`, borderRadius: '10px', color: color }}>
-          <Icon size={24} />
+        <div className="kpi-icon-container" style={{ 
+          padding: '8px', 
+          background: `${color}20`, 
+          borderRadius: '10px', 
+          color: color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Icon size={20} />
         </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '2px', textTransform: 'uppercase' }}>{title}</p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ 
+            color: 'var(--text-muted)', 
+            fontSize: '0.65rem', 
+            marginBottom: '2px', 
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>{title}</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
               <div style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '2px', 
-                fontSize: '0.75rem', 
+                gap: '1px', 
+                fontSize: '0.65rem', 
                 fontWeight: '700',
                 color: varColor,
-                background: `${varColor}15`,
-                padding: '2px 6px',
+                background: `${varColor}10`,
+                padding: '1px 4px',
                 borderRadius: '4px'
               }}>
-                {isIncrease && <TrendingUp size={12} />}
-                {isDecrease && <TrendingDown size={12} />}
-                {!isIncrease && !isDecrease && <Minus size={12} />}
-                {Math.abs(variation).toFixed(2)}%
+                {isIncrease && <TrendingUp size={10} />}
+                {isDecrease && <TrendingDown size={10} />}
+                {Math.abs(variation).toFixed(1)}%
               </div>
-              <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px' }}>{varLabel}</span>
             </div>
           </div>
         </div>
@@ -133,9 +144,9 @@ const Dashboard = () => {
   };
 
   const SectionTitle = ({ title, icon: Icon }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.2rem', marginTop: '1.5rem' }}>
-      <Icon size={18} color="var(--primary-color)" />
-      <h2 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', marginTop: '1.5rem' }}>
+      <Icon size={16} color="var(--primary-color)" />
+      <h2 style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
     </div>
   );
 
@@ -153,32 +164,30 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <header className="dashboard-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Dashboard Geral</h1>
-          <p style={{ color: 'var(--text-muted)' }}>
-            {isAllYears ? 'Visão Consolidada Histórica (2021-2026)' : `Visão consolidada do Batalhão Leste (${selectedYear})`}
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }}>Dashboard Geral</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            {isAllYears ? 'Histórico Consolidado' : `Batalhão Leste (${selectedYear})`}
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <LayersIcon size={20} color="var(--primary-color)" />
-          <div style={{ display: 'flex', gap: '4px', background: 'var(--glass-bg)', padding: '4px', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-            <button onClick={() => setSelectedYear('all')} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: selectedYear === 'all' ? 'var(--primary-color)' : 'transparent', color: selectedYear === 'all' ? 'white' : 'var(--text-muted)', fontWeight: '600' }}>TODOS</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <div className="year-selector" style={{ display: 'flex', gap: '2px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '8px', border: '1px solid var(--surface-border)', overflowX: 'auto', maxWidth: '100vw' }}>
+            <button onClick={() => setSelectedYear('all')} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: selectedYear === 'all' ? 'var(--primary-color)' : 'transparent', color: selectedYear === 'all' ? 'white' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.7rem' }}>TODOS</button>
             {YEARS.map(year => (
-              <button key={year} onClick={() => setSelectedYear(year)} style={{ padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: selectedYear === year ? 'var(--primary-color)' : 'transparent', color: selectedYear === year ? 'white' : 'var(--text-muted)', fontWeight: '600' }}>{year}</button>
+              <button key={year} onClick={() => setSelectedYear(year)} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: selectedYear === year ? 'var(--primary-color)' : 'transparent', color: selectedYear === year ? 'white' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.7rem' }}>{year}</button>
             ))}
           </div>
         </div>
       </header>
 
-      {/* PRODUTIVIDADE SECTION */}
-      <SectionTitle title="Produtividade Operacional" icon={CheckCircle} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
+      <SectionTitle title="Produtividade" icon={CheckCircle} />
+      <div className="kpi-grid">
         {PROD_ITEMS.map(item => (
           <KPICard 
             key={item}
-            title={item.replace(' (TRÁFICO)', '')} 
+            title={item.replace(' (TRÁFICO)', '').replace(' APREENDIDAS', '')} 
             value={currentDisplayProd[item]} 
             variation={isAllYears ? calculateGlobalVariation('prod', item) : (selectedYear > YEARS[0] ? calculateTotalVariation('prod', selectedYear, item) : 0)}
             icon={prodIcons[item] || CheckCircle} 
@@ -188,9 +197,8 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* ÍNDICES SECTION */}
-      <SectionTitle title="Índices de Criminalidade" icon={AlertTriangle} />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+      <SectionTitle title="Criminalidade" icon={AlertTriangle} />
+      <div className="kpi-grid">
         {STATS_ITEMS.map(item => (
           <KPICard 
             key={item}
@@ -205,33 +213,33 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{isAllYears ? 'Tendência Histórica de Crimes' : `Tendência de Crimes (${selectedYear})`}</h3>
-          <div style={{ height: '300px', width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
+        <div className="glass-panel" style={{ padding: '1rem' }}>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Tendência de Crimes</h3>
+          <div style={{ height: '250px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} />
-                <Tooltip contentStyle={{ background: 'var(--surface-color)', border: '1px solid var(--surface-border)', borderRadius: '8px' }} itemStyle={{ color: 'white' }} />
-                <Line type="monotone" dataKey="ROUBO" stroke="var(--primary-color)" strokeWidth={2} dot={{ fill: 'var(--primary-color)' }} />
-                <Line type="monotone" dataKey="FURTO" stroke="var(--accent-color)" strokeWidth={2} dot={{ fill: 'var(--accent-color)' }} />
-                <Line type="monotone" dataKey="HOMICÍDIO DOLOSO" stroke="#ef4444" strokeWidth={2} />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} />
+                <Tooltip contentStyle={{ background: 'var(--surface-color)', border: '1px solid var(--surface-border)', borderRadius: '8px', fontSize: '0.8rem' }} />
+                <Line type="monotone" dataKey="ROUBO" stroke="var(--primary-color)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="FURTO" stroke="var(--accent-color)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="HOMICÍDIO DOLOSO" stroke="#ef4444" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{isAllYears ? 'Produtividade Total por Categoria' : `Produtividade por Categoria (${selectedYear})`}</h3>
-          <div style={{ height: '300px', width: '100%' }}>
+        <div className="glass-panel" style={{ padding: '1rem' }}>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Produtividade por Categoria</h3>
+          <div style={{ height: '250px', width: '100%' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={PROD_ITEMS.map(item => ({ name: item.split(' ')[0], value: currentDisplayProd[item] }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} />
-                <Tooltip contentStyle={{ background: 'var(--surface-color)', border: '1px solid var(--surface-border)', borderRadius: '8px' }} />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={8} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} />
+                <Tooltip contentStyle={{ background: 'var(--surface-color)', border: '1px solid var(--surface-border)', borderRadius: '8px', fontSize: '0.8rem' }} />
                 <Bar dataKey="value" fill="var(--secondary-color)" radius={[4, 4, 0, 0]}>
                   {PROD_ITEMS.map((entry, index) => <Cell key={`cell-${index}`} fill={index % 2 === 0 ? 'var(--primary-color)' : 'var(--accent-color)'} />)}
                 </Bar>
@@ -240,6 +248,15 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 480px) {
+          .kpi-icon-container { padding: 6px !important; }
+          .kpi-icon-container svg { width: 16px; height: 16px; }
+          h3 { font-size: 1.1rem !important; }
+          .year-selector { margin-top: 0.5rem; width: 100%; justify-content: space-between; }
+        }
+      `}} />
     </div>
   );
 };

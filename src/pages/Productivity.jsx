@@ -15,69 +15,43 @@ const Productivity = () => {
 
   return (
     <div className="animate-fade-in">
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <header style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Produtividade Policial</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Desempenho operacional comparativo - Batalhão Leste</p>
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }}>Produtividade</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Batalhão Leste ({selectedYear})</p>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {isDirty && (
-            <span style={{ color: 'var(--accent-color)', fontSize: '0.8rem', fontWeight: '600', animation: 'pulse 2s infinite' }}>
-              Alterações não salvas
-            </span>
-          )}
-          {lastSaved && !isDirty && (
-            <span style={{ color: 'var(--success)', fontSize: '0.8rem' }}>
-              Salvo às {lastSaved.toLocaleTimeString()}
-            </span>
-          )}
-          {isAdmin && (
-            <button 
-              onClick={saveData}
-              disabled={loading || !isDirty}
-              style={{
-                padding: '8px 20px',
-                borderRadius: '8px',
-                border: 'none',
-                background: isDirty ? 'linear-gradient(135deg, var(--primary-color), var(--accent-color))' : 'var(--glass-bg)',
-                color: isDirty ? 'white' : 'var(--text-muted)',
-                fontWeight: '600',
-                cursor: isDirty ? 'pointer' : 'default',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.3s'
-              }}
-            >
-              {loading ? 'Salvando...' : 'Salvar Dados'}
-            </button>
-          )}
-          <Calendar size={20} color="var(--primary-color)" />
-          <div style={{ display: 'flex', gap: '4px', background: 'var(--glass-bg)', padding: '4px', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-            {YEARS.map(year => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {isAdmin && (
+              <button 
+                onClick={saveData}
+                disabled={loading || !isDirty}
                 style={{
                   padding: '6px 12px',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   border: 'none',
-                  cursor: 'pointer',
-                  background: selectedYear === year ? 'var(--primary-color)' : 'transparent',
-                  color: selectedYear === year ? 'white' : 'var(--text-muted)',
+                  background: isDirty ? 'var(--primary-color)' : 'var(--glass-bg)',
+                  color: 'white',
                   fontWeight: '600',
-                  transition: 'all 0.2s'
+                  fontSize: '0.75rem'
                 }}
               >
-                {year}
+                {loading ? '...' : 'Salvar'}
               </button>
+            )}
+            {isDirty && <span style={{ color: 'var(--accent-color)', fontSize: '0.7rem', fontWeight: '700' }}>PENDENTE</span>}
+          </div>
+
+          <div className="year-selector" style={{ display: 'flex', gap: '2px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '8px', border: '1px solid var(--surface-border)', overflowX: 'auto' }}>
+            {YEARS.map(year => (
+              <button key={year} onClick={() => setSelectedYear(year)} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', background: selectedYear === year ? 'var(--primary-color)' : 'transparent', color: selectedYear === year ? 'white' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.7rem' }}>{year}</button>
             ))}
           </div>
         </div>
       </header>
 
-      <div className="glass-panel" style={{ overflowX: 'auto', padding: '1rem' }}>
+      <div className="glass-panel table-container">
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
@@ -102,11 +76,11 @@ const Productivity = () => {
                             type="number" 
                             value={val === 0 ? '' : val} 
                             placeholder="0"
-                            step="0.01"
+                            className="mobile-table-input"
                             onChange={(e) => updateProd(selectedYear, item, idx, e.target.value)}
                             onFocus={(e) => e.target.value === '0' && (e.target.value = '')}
                             style={{ 
-                              width: '65px', 
+                              width: '60px', 
                               background: 'rgba(255,255,255,0.05)', 
                               border: '1px solid var(--surface-border)', 
                               borderRadius: '4px',

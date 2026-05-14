@@ -131,7 +131,50 @@ h1, h2, h3 {
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    padding: 1.5rem;
-    padding-top: 5rem; /* Space for mobile toggle */
+    padding: 1rem;
+    padding-top: 4.5rem; /* Space for mobile toggle */
   }
+
+  .container {
+    padding: 1rem;
+  }
+
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.2rem !important; }
+  h3 { font-size: 1rem !important; }
+
+  .glass-card {
+    padding: 1rem !important;
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row on very small screens */
+    gap: 0.8rem;
+  }
+  
+  .mobile-table-input {
+    width: 55px !important;
+    font-size: 0.8rem !important;
+    padding: 6px 2px !important;
+  }
+
+  th, td {
+    padding: 0.5rem 0.3rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 2rem;
+  border-radius: 12px;
 }
