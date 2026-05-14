@@ -4,11 +4,12 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { 
   Shield, Target, AlertTriangle, CheckCircle, Calendar, 
   Skull, HandCoins, Car, Bus, Store, Zap, Package, 
-  ShieldAlert, UserMinus, CarFront, FlaskConical, Layers, Lock, Ghost, Search
+  ShieldAlert, UserMinus, CarFront, FlaskConical, Layers, Lock, Ghost, Search,
+  TrendingUp, TrendingDown, Minus
 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal } = useData();
+  const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal, calculateTotalVariation } = useData();
 
   const currentYearStats = statsData[selectedYear] || {};
   const currentYearProd = prodData[selectedYear] || {};
@@ -21,30 +22,61 @@ const Dashboard = () => {
     return data;
   });
 
-  const KPICard = ({ title, value, icon: Icon, color }) => (
-    <div className="glass-card" style={{ 
-      padding: '1.2rem', 
-      display: 'flex', 
-      alignItems: 'center', 
-      gap: '1rem', 
-      flex: '1 1 200px',
-      border: '1px solid var(--surface-border)',
-      transition: 'transform 0.2s'
-    }}>
-      <div style={{ padding: '10px', background: `${color}20`, borderRadius: '10px', color: color }}>
-        <Icon size={24} />
+  const KPICard = ({ title, value, variation, icon: Icon, color, isInverse = false }) => {
+    // isInverse = true for crimes (where increase is bad/red)
+    const isIncrease = variation > 0;
+    const isDecrease = variation < 0;
+    
+    // Determine color based on whether increase is good or bad
+    let varColor = 'var(--text-muted)';
+    if (isIncrease) varColor = isInverse ? '#ef4444' : '#10b981';
+    if (isDecrease) varColor = isInverse ? '#10b981' : '#ef4444';
+
+    return (
+      <div className="glass-card" style={{ 
+        padding: '1.2rem', 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '1rem', 
+        border: '1px solid var(--surface-border)',
+        transition: 'transform 0.2s',
+        minWidth: '240px'
+      }}>
+        <div style={{ padding: '10px', background: `${color}20`, borderRadius: '10px', color: color }}>
+          <Icon size={24} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{title}</p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700' }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
+            {selectedYear > YEARS[0] && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '2px', 
+                fontSize: '0.75rem', 
+                fontWeight: '600',
+                color: varColor,
+                background: `${varColor}15`,
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }}>
+                {isIncrease && <TrendingUp size={12} />}
+                {isDecrease && <TrendingDown size={12} />}
+                {!isIncrease && !isDecrease && <Minus size={12} />}
+                {Math.abs(variation).toFixed(2)}%
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-      <div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '2px' }}>{title}</p>
-        <h3 style={{ fontSize: '1.4rem', fontWeight: '700' }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const SectionTitle = ({ title, icon: Icon }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', marginTop: '1rem' }}>
-      <Icon size={20} color="var(--primary-color)" />
-      <h2 style={{ fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.2rem', marginTop: '1.5rem' }}>
+      <Icon size={18} color="var(--primary-color)" />
+      <h2 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
     </div>
   );
 
@@ -107,28 +139,42 @@ const Dashboard = () => {
 
       {/* PRODUTIVIDADE SECTION */}
       <SectionTitle title="Produtividade Operacional" icon={CheckCircle} />
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+        gap: '1rem', 
+        marginBottom: '2.5rem' 
+      }}>
         {PROD_ITEMS.map(item => (
           <KPICard 
             key={item}
             title={item.replace(' (TRÁFICO)', '')} 
             value={calculateTotal(currentYearProd[item])} 
+            variation={calculateTotalVariation('prod', selectedYear, item)}
             icon={prodIcons[item] || CheckCircle} 
             color="#10b981" 
+            isInverse={false}
           />
         ))}
       </div>
 
       {/* ÍNDICES SECTION */}
       <SectionTitle title="Índices de Criminalidade" icon={AlertTriangle} />
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+        gap: '1rem', 
+        marginBottom: '3rem' 
+      }}>
         {STATS_ITEMS.map(item => (
           <KPICard 
             key={item}
             title={item} 
             value={calculateTotal(currentYearStats[item])} 
+            variation={calculateTotalVariation('stats', selectedYear, item)}
             icon={statsIcons[item] || AlertTriangle} 
             color="#ef4444" 
+            isInverse={true}
           />
         ))}
       </div>
