@@ -182,12 +182,16 @@ export const DataProvider = ({ children }) => {
     const today = new Date();
     const currentRealYear = today.getFullYear();
     const currentMonth = today.getMonth();
+
     let currentTotal = 0;
     let previousTotal = 0;
+
     if (Number(year) === currentRealYear) {
-      for (let i = 0; i <= currentMonth; i++) {
-        currentTotal += (currentYearData[item][i] || 0);
-        previousTotal += (previousYearData[item][i] || 0);
+      if (currentMonth > 0) {
+        for (let i = 0; i < currentMonth; i++) {
+          currentTotal += (currentYearData[item][i] || 0);
+          previousTotal += (previousYearData[item][i] || 0);
+        }
       }
     } else {
       currentTotal = calculateTotal(currentYearData[item]);
