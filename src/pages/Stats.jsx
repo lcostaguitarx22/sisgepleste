@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Calendar, Edit2, Lock } from 'lucide-react';
 
 const Stats = () => {
   const { statsData, updateStats, STATS_ITEMS, MONTHS, YEARS, selectedYear, setSelectedYear, calculateTotal, calculateVariation, calculateTotalVariation, isDirty, saveData, loading, lastSaved } = useData();
   const { isAdmin } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
 
   const VariationBadge = ({ value }) => {
     if (value > 0) return <span style={{ color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><TrendingUp size={14} /> {value.toFixed(2)}%</span>;
@@ -24,17 +25,39 @@ const Stats = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
             {isAdmin && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--surface-border)',
+                  background: isEditing ? 'var(--primary-color)' : 'transparent',
+                  color: isEditing ? 'white' : 'var(--text-main)',
+                  fontWeight: '600',
+                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                {isEditing ? <Lock size={14} /> : <Edit2 size={14} />}
+                {isEditing ? 'Bloquear Dados' : 'Editar Dados'}
+              </button>
+            )}
+            {isAdmin && (
               <button 
-                onClick={saveData}
+                onClick={() => { saveData(); setIsEditing(false); }}
                 disabled={loading || !isDirty}
                 style={{
                   padding: '6px 12px',
                   borderRadius: '8px',
                   border: 'none',
                   background: isDirty ? 'var(--primary-color)' : 'var(--glass-bg)',
-                  color: 'white',
+                  color: isDirty ? 'white' : 'var(--text-main)',
                   fontWeight: '600',
-                  fontSize: '0.75rem'
+                  fontSize: '0.75rem',
+                  cursor: (loading || !isDirty) ? 'not-allowed' : 'pointer'
                 }}
               >
                 {loading ? '...' : 'Salvar'}
@@ -55,7 +78,7 @@ const Stats = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--surface-border)' }}>
-              <th style={{ padding: '1.5rem 1rem', color: 'var(--text-muted)', fontWeight: '500' }}>ITEM ({selectedYear})</th>
+              <th style={{ padding: '1.5rem 1rem', color: 'var(--text-muted)', fontWeight: '500' }}>DESCRIÇÃO ({selectedYear})</th>
               {MONTHS.map(m => <th key={m} style={{ padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{m}</th>)}
               <th style={{ padding: '1rem', textAlign: 'center', color: 'var(--primary-color)' }}>TOTAL</th>
             </tr>
@@ -67,7 +90,7 @@ const Stats = () => {
 
               return (
                 <React.Fragment key={item}>
-                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <tr style={{ background: 'var(--glass-bg)' }}>
                     <td style={{ padding: '1rem', fontWeight: '600', fontSize: '0.9rem' }}>{item}</td>
                     {rowData.map((val, idx) => (
                       <td key={idx} style={{ padding: '0.5rem', textAlign: 'center' }}>
@@ -78,17 +101,17 @@ const Stats = () => {
                             placeholder="0"
                             className="mobile-table-input"
                             onChange={(e) => updateStats(selectedYear, item, idx, e.target.value)}
-                            onFocus={(e) => e.target.value === '0' && (e.target.value = '')}
+                            disabled={!isEditing}
                             style={{ 
                               width: '60px', 
-                              background: 'rgba(255,255,255,0.05)', 
-                              border: '1px solid var(--surface-border)', 
+                              background: isEditing ? 'var(--glass-bg)' : 'transparent', 
+                              border: isEditing ? '1px solid var(--surface-border)' : '1px solid transparent', 
                               borderRadius: '4px',
-                              color: 'white',
+                              color: 'var(--text-main)',
                               textAlign: 'center',
                               padding: '4px',
-                              opacity: val === 0 ? 0.5 : 1,
-                              transition: 'opacity 0.2s'
+                              opacity: val === 0 && !isEditing ? 0.5 : 1,
+                              transition: 'all 0.2s'
                             }}
                           />
                         ) : (

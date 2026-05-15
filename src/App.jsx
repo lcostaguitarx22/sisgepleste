@@ -2,10 +2,12 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Stats from './pages/Stats';
 import Productivity from './pages/Productivity';
+import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import './index.css';
 
@@ -24,28 +26,34 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route 
-              path="/dashboard" 
-              element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
-            />
-            <Route 
-              path="/stats" 
-              element={<ProtectedRoute><Stats /></ProtectedRoute>} 
-            />
-            <Route 
-              path="/productivity" 
-              element={<ProtectedRoute><Productivity /></ProtectedRoute>} 
-            />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-          </Routes>
-        </Router>
-      </DataProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <DataProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route 
+                path="/dashboard" 
+                element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/stats" 
+                element={<ProtectedRoute><Stats /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/productivity" 
+                element={<ProtectedRoute><Productivity /></ProtectedRoute>} 
+              />
+              <Route 
+                path="/settings" 
+                element={<ProtectedRoute><Settings /></ProtectedRoute>} 
+              />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </Router>
+        </DataProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
