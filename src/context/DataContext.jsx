@@ -4,13 +4,13 @@ import { supabase } from '../lib/supabase';
 const DataContext = createContext();
 
 const STATS_ITEMS = [
-  "HOMICÍDIO DOLOSO", "LATROCÍNIO", "ROUBO DE VEÍCULOS", "FURTO DE VEÍCULOS", 
-  "ROUBO EM RESIDÊNCIA", "ROUBO A TRANSEUNTES", "ROUBO A COLETIVO", 
+  "HOMICÍDIO DOLOSO", "LATROCÍNIO", "ROUBO DE VEÍCULOS", "FURTO DE VEÍCULOS",
+  "ROUBO EM RESIDÊNCIA", "ROUBO A TRANSEUNTES", "ROUBO A COLETIVO",
   "ROUBO A PONTO COMERCIAL", "MORTE POR INTERVENÇÃO PM", "FURTO", "ROUBO"
 ];
 
 const PROD_ITEMS = [
-  "ARMAS DE FOGO APREENDIDAS", "VEÍCULOS RECUPERADOS", 
+  "ARMAS DE FOGO APREENDIDAS", "VEÍCULOS RECUPERADOS",
   "ENTORPECENTES EM Kg (TRÁFICO)", "MUNIÇÕES", "PRESOS", "SIMULACRO", "FORAGIDOS"
 ];
 
@@ -51,7 +51,7 @@ export const DataProvider = ({ children }) => {
       console.log('Buscando dados do Supabase...');
       setLoading(true);
       const { data, error } = await supabase.from('data_entries').select('*');
-      
+
       if (error) throw error;
 
       if (data) {
@@ -62,7 +62,7 @@ export const DataProvider = ({ children }) => {
         data.forEach(entry => {
           const yearNum = Number(entry.year);
           const row = DB_MONTHS.map(m => Number(entry[m] || 0));
-          
+
           if (entry.type === 'stats') {
             if (newStats[yearNum] && newStats[yearNum][entry.item]) {
               newStats[yearNum][entry.item] = row;
@@ -97,7 +97,7 @@ export const DataProvider = ({ children }) => {
       const entries = [];
       const currentStats = statsRef.current;
       const currentProd = prodRef.current;
-      
+
       YEARS.forEach(year => {
         STATS_ITEMS.forEach(item => {
           const row = currentStats[year][item];
@@ -164,7 +164,7 @@ export const DataProvider = ({ children }) => {
   };
 
   const calculateTotal = (dataArray) => dataArray ? dataArray.reduce((acc, curr) => acc + curr, 0) : 0;
-  
+
   const calculateVariation = (type, year, item, monthIdx) => {
     const currentYearData = type === 'stats' ? statsData[year] : prodData[year];
     const previousYearData = type === 'stats' ? statsData[year - 1] : prodData[year - 1];
@@ -202,8 +202,8 @@ export const DataProvider = ({ children }) => {
   };
 
   return (
-    <DataContext.Provider value={{ 
-      statsData, prodData, updateStats, updateProd, 
+    <DataContext.Provider value={{
+      statsData, prodData, updateStats, updateProd,
       STATS_ITEMS, PROD_ITEMS, MONTHS, YEARS,
       selectedYear, setSelectedYear, loading, isDirty, lastSaved, saveData, fetchData,
       calculateTotal, calculateVariation, calculateTotalVariation
