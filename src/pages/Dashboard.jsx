@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, LabelList } from 'recharts';
 import {
   Shield, Target, AlertTriangle, CheckCircle, Calendar,
   Skull, HandCoins, Car, Bus, Store, Zap, Package,
   ShieldAlert, UserMinus, CarFront, FlaskConical, Layers, Lock, Ghost, Search,
-  TrendingUp, TrendingDown, Minus, Layers as LayersIcon
+  TrendingUp, TrendingDown, Minus, Layers as LayersIcon, Image as ImageIcon
 } from 'lucide-react';
+import FlyerModal from '../components/FlyerModal';
 
 const Dashboard = () => {
   const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal, calculateTotalVariation } = useData();
+  const [showFlyer, setShowFlyer] = useState(false);
 
   const isAllYears = selectedYear === 'all';
 
@@ -179,8 +181,17 @@ const Dashboard = () => {
               <button key={year} onClick={() => setSelectedYear(year)} style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: selectedYear === year ? 'var(--primary-color)' : 'transparent', color: selectedYear === year ? 'white' : 'var(--text-muted)', fontWeight: '600', fontSize: '0.7rem' }}>{year}</button>
             ))}
           </div>
+          <button 
+            onClick={() => setShowFlyer(true)} 
+            className="btn-primary" 
+            style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          >
+            <ImageIcon size={14} /> Exibir Fly
+          </button>
         </div>
       </header>
+
+      <FlyerModal isOpen={showFlyer} onClose={() => setShowFlyer(false)} />
 
       <SectionTitle title="Produtividade" icon={CheckCircle} />
       <div className="kpi-grid">
