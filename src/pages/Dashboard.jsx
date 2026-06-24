@@ -9,6 +9,77 @@ import {
 } from 'lucide-react';
 import FlyerModal from '../components/FlyerModal';
 
+const SectionTitle = ({ title, icon: Icon }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', marginTop: '1.5rem' }}>
+    <Icon size={16} color="var(--primary-color)" />
+    <h2 style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
+  </div>
+);
+
+const KPICard = ({ title, value, variation, icon: Icon, color, isInverse = false, varLabel = "" }) => {
+  const isIncrease = variation > 0;
+  const isDecrease = variation < 0;
+
+  let varColor = 'var(--text-muted)';
+  if (isIncrease) varColor = isInverse ? '#ef4444' : '#10b981';
+  if (isDecrease) varColor = isInverse ? '#10b981' : '#ef4444';
+
+  return (
+    <div className="glass-card" style={{
+      padding: '1rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.8rem',
+      border: '1px solid var(--surface-border)',
+      width: '100%'
+    }}>
+      <div className="kpi-icon-container" style={{
+        padding: '8px',
+        background: `${color}20`,
+        borderRadius: '10px',
+        color: color,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <Icon size={20} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{
+          color: 'var(--text-muted)',
+          fontSize: '0.65rem',
+          marginBottom: '2px',
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
+        }}>{title}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: '700', margin: 0 }}>{value % 1 === 0 ? value : value.toFixed(2)}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1px',
+              fontSize: '0.65rem',
+              fontWeight: '700',
+              color: varColor,
+              background: `${varColor}10`,
+              padding: '1px 4px',
+              borderRadius: '4px'
+            }}>
+              {isIncrease && <TrendingUp size={10} />}
+              {isDecrease && <TrendingDown size={10} />}
+              {Math.abs(variation).toFixed(1)}%
+              {varLabel && <span style={{ marginLeft: '4px', fontSize: '0.55rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>{varLabel}</span>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const { statsData, prodData, MONTHS, YEARS, selectedYear, setSelectedYear, STATS_ITEMS, PROD_ITEMS, calculateTotal, calculateTotalVariation } = useData();
   const [showFlyer, setShowFlyer] = useState(false);
@@ -44,7 +115,7 @@ const Dashboard = () => {
 
   let currentDisplayStats = {};
   let currentDisplayProd = {};
-  let chartData = [];
+  let chartData;
 
   if (isAllYears) {
     STATS_ITEMS.forEach(item => {
@@ -137,6 +208,7 @@ const Dashboard = () => {
                 {isIncrease && <TrendingUp size={10} />}
                 {isDecrease && <TrendingDown size={10} />}
                 {Math.abs(variation).toFixed(1)}%
+                {varLabel && <span style={{ marginLeft: '4px', fontSize: '0.55rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>{varLabel}</span>}
               </div>
             </div>
           </div>
@@ -145,12 +217,6 @@ const Dashboard = () => {
     );
   };
 
-  const SectionTitle = ({ title, icon: Icon }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', marginTop: '1.5rem' }}>
-      <Icon size={16} color="var(--primary-color)" />
-      <h2 style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{title}</h2>
-    </div>
-  );
 
   const statsIcons = {
     "HOMICÍDIO DOLOSO": Skull, "LATROCÍNIO": HandCoins, "ROUBO DE VEÍCULOS": Car,
